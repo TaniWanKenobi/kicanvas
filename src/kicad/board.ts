@@ -138,6 +138,21 @@ export class KicadPCB {
             }
             bbox = BBox.combine([bbox, item.bbox]);
         }
+
+        // Some newer KiCad boards can end up with edge cuts that this parser
+        // does not recognize yet. Fall back to the actual board contents so
+        // the viewer still frames a visible region instead of zooming to a
+        // zero-sized box.
+        if (!bbox.valid) {
+            const bboxes = [];
+            for (const item of this.items()) {
+                if ("bbox" in item) {
+                    bboxes.push(item.bbox);
+                }
+            }
+            bbox = BBox.combine(bboxes);
+        }
+
         return bbox;
     }
 
